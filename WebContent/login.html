@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>登陆</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="//www.w3cschool.cn/statics/assets/react/react.min.js"></script>
+<script src="//www.w3cschool.cn/statics/assets/react/react-dom.min.js"></script>
+<script src="//www.w3cschool.cn/statics/assets/react/babel.min.js"></script>
+	<style>
+		.jumbotron{
+			position:fixed;
+			width:100%;
+		}
+	</style>
+</head>
+<body>
+	<div class="jumbotron">
+	<div class="container">
+		<h1 class="text-center">欢迎登陆xxxx</h1>
+		<h2 class="text-center">请输入手机号码</h2>
+		<form class="form-horizontal" role="form" action="" method="post">
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input type="text" class="form-control input-lg" id="userPhone" name="userPhone" placeholder="请输入手机号">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-xs-12">
+					<div class="input-group input-group-lg">
+						<input type="password" class="form-control input-lg col-xs-10" id="password" name="password" placeholder="请输入验证码">
+						<span class="input-group-btn">
+		                	<button class="btn btn-default" type="button" style="font-size:12px;" id="get">获取验证码</button>
+		                </span>
+	                </div>
+                </div>
+			</div>
+			
+		</form>
+		<button class="btn btn-default btn-lg btn-block" id="login">登录</button>
+	</div>
+	</div>
+	<script>
+		var height=$(window).height();
+		$(".jumbotron").css("top",height*0.1+'px');
+		$(document).ready(function(){
+			//点击获取验证码获取验证码
+			$("#get").on("click",function(){
+				$.ajax({
+		    		url:"getCodeServlet",
+		    		type:"post",
+		    		cache:false,
+		    		data:{
+		    			phone:$("#userPhone").val()
+		    		},
+		    		complete:function(){
+		    			var time=40;
+		    			var t = setInterval(function(){
+		    				$("#get").text(time+"s后重新获取");
+		    				if(time==0){
+			    				clearInterval(t);
+			    				$("#get").text("获取验证码");
+			    			}
+		    				time--;
+		    			}, 1000);
+		    			
+		    		}
+		    	});
+			});
+			
+			//点击登陆跳转
+			$("#login").on("click",function(){
+				window.location.replace("main.html");
+			})
+		});
+	</script>
+</body>
+</html>

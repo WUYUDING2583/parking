@@ -1,0 +1,468 @@
+<!Doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>主页</title>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.8&key=cc17678642f59e975f39bb06fcb83665&plugin=AMap.Autocomplete,AMap.PlaceSearch,AMap.Geolocation"></script>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="js/hammer.js"></script>
+	<link rel="stylesheet" href="css/main.css"> 
+	<script src="js/jquery.seat-charts.min.js"></script>
+	<script src="js/jquery.seat-charts.js"></script>
+	<script src="js/jquery-ui.js"></script> 
+	<link rel="stylesheet" href="css/jquery-ui.css"> 
+</head>
+<body>
+<div id='container'></div>
+<div id="userTotal">
+	<!-- 背景面板 -->
+	<div id="background"></div>
+	<!-- 个人页面 -->
+	<div class="panel panel-default" id="person">
+		<div class="panel-heading" id="personhead">
+			<img src="http://jsjzx.top/1.jpg" class="img-circle imghead">
+			<span class="lead headname">用户名称/用户头像</span>
+		</div>
+		<div class="panel-body">
+			<ul class="nav nav-pills nav-justified">
+				<li class="list-group-item text-center" id="intoMybook">我的预约</li>
+				<li class="list-group-item text-center" id="intoMycarid">我的车牌</li>
+				<li class="list-group-item text-center" id="exit">退出登陆</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- 清空历史记录 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body text-center lead">确认清空输入历史？</div>
+			<div class="modal-footer">
+				<div class="row">
+					<div class="col-xs-9">
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-info" data-dismiss="modal" id="sureClear">确认</button>
+					</div>
+					<div class="col-xs-3"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 停车场选位页面 -->
+<div id="parkSeat">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header" style="height:81px;">
+		      	<span class="navbar-brand glyphicon glyphicon-chevron-left back" ></span>
+		   		<span class="navbar-brand ">xxxxx停车场</span>
+		   	</div>
+	   	</div>
+	</nav>
+	<div id="bookInfo">
+		<div class="row rowinbookInfo">
+			<div class="col-xs-6 text-center">
+				<div class="row halfrowinbookInfo">
+					<h6>预约时间:xxxxx</h6>
+				</div>
+				<div class="row halfrowinbookInfo">
+					<h6>离开时间:xxxxx</h6>
+				</div>
+			</div>
+			<div class="col-xs-6 text-center">
+				<div class="row  rowinbookInfo" id="seatCount">
+					<h4>共xxx元</h4>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+	<div id="hint">
+		<div class="row">
+			<div class="col-xs-1"></div>
+			<div class="col-xs-5 text-center" style="margin:6px">
+				<div id="hintAvailable"></div>
+				<span class="pull-left">&nbsp;&nbsp;可选位</span>
+			</div>
+			<div class="col-xs-5 text-center"style="margin:6px">
+				<div id="hintUnavailable"></div>
+				<span class="pull-left">&nbsp;&nbsp;不可选位</span>
+			</div>
+			<div class="col-xs-1"></div>
+		</div>
+	</div>
+	<div id="seatContainer">
+		<div class="row text-center">
+			<div class="col-xs-1"></div>
+			<div class="front col-xs-10">北</div>  
+			<div class="col-xs-1"></div>
+		</div>
+		<div style="overflow:hidden;">
+	 		<div id="seat-map"></div>
+	    </div>
+	</div>
+	<div id="bookDetail">
+	  	<div id="selectSeat"></div>
+	  	<button class="btn btn-danger btn-block" id="seatButton">确认选位</button>
+	</div>
+</div>
+
+<!-- 选择车牌模态框 -->
+<div class="modal fade" id="selectCarIDModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">请选择车牌号</h4>
+            </div>
+            <div class="modal-body" id="selectCarIDModalBody">
+				<button class="btn btn-info btn-block">输入车牌</button>
+			</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 输入车牌模态框 -->
+<div class="modal fade" id="carIDModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">请输入其余车牌号</h4>
+            </div>
+            <div class="modal-body">
+				<form class="form-horizontal" role="form" id="carId">
+                	<div class="form-group" id="group1">
+                		<label for="carId1" class="col-xs-4 control-label">车牌</label>
+                		<div class="col-xs-8">
+                			<input type="text"  class="form-control" name="carId1" id="carId1">
+                		</div>
+                	</div>
+                	<div class="row">
+                	<div class="col-xs-2"></div>
+                		<div class="col-xs-8">
+                	 		<button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                			<button type="submit" class="btn btn-info pull-right" data-dismiss="modal" id="carIdBtn">确认</button>
+                	 	</div>
+                	 	<div class="col-xs-2"></div>
+                	</div>
+                </form>
+			</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 我的预约页面 -->
+<div id="myReservation">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+	      		<span class="navbar-brand glyphicon glyphicon-chevron-left back" ></span>
+	   			<span class="navbar-brand ">我的预约</span>
+	   		</div>
+   		</div>
+	</nav>
+	<div class="panel-group myBookList" id="myBookList">
+	    <div class="panel panel-default">
+	        <div class="panel-heading">
+	            <h4 class="panel-title">
+	            	<div class="media">
+	                	<div class="media-left">
+	                		<img class="media-object imgPark" src="http://jsjzx.top/1.jpg">
+	                	</div>
+	                	<div class="media-body bodyBook">
+	                		<p id="destinationname">杭州西湖风景名胜区音乐喷泉</p>
+	                		<p>停车场地址</p>
+	                		<p>预约车位编号</p>
+	                		<p>预约时间</p>
+	                		<input type="hidden" id="destinationlng" value="120.16097">
+	                		<input type="hidden" id="destinationlat" value="30.253778">
+	                	</div>
+	                </div>
+	                <h4 class="text-center">
+		                <button class="btn btn-success" id="tothere">
+		                		到这去
+		                	<span class="glyphicon glyphicon-new-window"></span>
+		            
+		                </button>
+		            </h4>
+	            </h4>
+	        </div>
+	    </div>
+	</div>
+</div>
+
+<!-- 选择起调的地图app-->
+<div class="modal fade" id="mapAPP" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+				<ul class="list-group" id="mapList">
+					<li class="list-group-item">
+						<a id="baidu">
+							百度地图
+						</a>
+					</li>
+					<li class="list-group-item">
+						<a id="gaode">
+							高德地图
+						</a>
+					</li>
+				</ul>
+			</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 我的车牌 -->
+<div class="nav2">
+	<div class="input-group input-group-lg">
+		<input type="text" class="form-control" id="addCar" name="addCar" placeholder="请输入车牌号" style="border-right:none;">
+		<span class="input-group-addon" style="border-left:none;background-color:white;">
+			<span class="glyphicon glyphicon-remove"></span>
+		</span>
+		<span class="input-group-btn">
+			<button class="btn btn-default" id="addCarId">添加</button>
+		</span>
+	 </div>
+</div>
+<div id="myCarId">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<div class="nav1">
+		      		<span class="navbar-brand glyphicon glyphicon-chevron-left back" ></span>
+		   			<span class="navbar-brand">我的车牌</span>
+		   			<ul class="nav navbar-nav navbar-right pull-right" id="addIcon">
+		   				<li><span class="glyphicon glyphicon-plus">添加车牌</span>
+		   			</ul>
+	   			</div>
+	   		</div>
+   		</div>
+	</nav>
+	<div class="panel-group carIdList" id="carIdList">
+	    <div class="panel panel-default carIdItem">
+	        <div class="panel-heading">
+	            <h4 class="panel-title">
+	            	<div class="row text-center">
+	                	<p id="car1" class="carid">浙Adjs32</p>
+	                	<a data-toggle="collapse" data-parent="#carIdList" href="#collapseOne">修改车牌</a>
+	                </div>
+	            </h4>
+	        </div>
+	     <div id="collapseOne" class="panel-collapse collapse">
+	         <div class="panel-body">
+	               <div class="row">
+		                <div class="col-xs-3"></div>
+		                <div class="col-xs-6">
+		                	<button class="btn btn-info caridDelete pull-left">删除</button>
+		                	<button class="btn btn-success caridAlter pull-right">修改</button>
+		                </div>
+		                <div class="col-xs-3"></div>
+	                </div>
+	          </div>
+	       </div>
+	    </div>
+	    <div class="panel panel-default carIdItem">
+	        <div class="panel-heading">
+	            <h4 class="panel-title">
+	            	<div class="row text-center">
+	                	<p id="car2" class="carid">浙BNM45</p>
+	                	<a data-toggle="collapse" data-parent="#carIdList" href="#collapseTwo">修改车牌</a>
+	                </div>
+	            </h4>
+	        </div>
+	     <div id="collapseTwo" class="panel-collapse collapse">
+	         <div class="panel-body">
+	               <div class="row">
+		                <div class="col-xs-3"></div>
+		                <div class="col-xs-6">
+		                	<button class="btn btn-info caridDelete pull-left">删除</button>
+		                	<button class="btn btn-success caridAlter pull-right">修改</button>
+		                </div>
+		                <div class="col-xs-3"></div>
+	                </div>
+	          </div>
+	       </div>
+	    </div>
+	</div>
+</div>
+
+<!-- 修改车牌模态框-->
+<div class="modal fade" id="carIdAlter" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        	<div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">修改车牌</h4>
+            </div>
+            <div class="modal-body">
+				<form role="form" class="form-horizontal" id="alterCarIdForm">
+					<input type="hidden" name="carNo" >
+					<div class="form-group" id='originCarInput'>
+                		<label for="originCarId" class="col-xs-3 control-label">原车牌</label>
+                		<div class="col-xs-9">
+                			<input type="text" class="form-control" disabled='disabled' name="originCarId" id="originCarId">
+                		</div>
+                	</div>
+					<div class="form-group">
+                		<label for="afterCarId" class="col-xs-3 control-label">修改</label>
+                		<div class="col-xs-9">
+                			<input type="text" class="form-control" name="afterCarId" id="afterCarId">
+                		</div>
+                	</div>
+                	<div class="row">
+                	<div class="col-xs-2"></div>
+                		<div class="col-xs-8">
+                	 		<button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                			<button type="submit" class="btn btn-info pull-right" data-dismiss="modal" id="confirmAlterCarId">确认</button>
+                	 	</div>
+                	 	<div class="col-xs-2"></div>
+                	</div>
+				</form>
+			</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 停车场信息页面 -->
+<div id="parksInfo">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+	      		<span class="navbar-brand glyphicon glyphicon-chevron-left back" ></span>
+	   			<span class="navbar-brand ">停车场信息</span>
+	   		</div>
+   		</div>
+	</nav>
+	<div class="panel-group parksInfo" id="accordion">
+	    <div class="panel panel-default">
+	        <div class="panel-heading">
+	            <h4 class="panel-title">
+	            	<div class="media">
+	                	<div class="media-left">
+	                		<img class="media-object imgPark" src="http://jsjzx.top/1.jpg">
+	                	</div>
+	                	<div class="media-body bodyPark">
+	                		<p>停车场名称</p>
+	                		<p>停车场地址</p>
+	                		<p>距您xxx公里</p>
+	                		<p>距目标地xxx公里</p>
+	                	</div>
+	                </div>
+	                <h5 class="text-center">
+		                <a  class="book" data-toggle="collapse" data-parent="#accordion" 
+		                href="#collapseOne">
+		                	我要预约
+		                </a>
+		             </h5>
+	            </h4>
+	        </div>
+	    </div>
+	</div>
+</div>
+<!-- 输入框 -->
+<div id="tip">
+	<div id="center">
+		<div class="input-group input-group-lg">
+			<span id="userIcon"class="input-group-addon"	style="background-color:white;">
+			<!-- 头像，从后台传输
+				<img src=<%=imgpath %> class="img-circle img-responsive">
+			 -->
+			<span class="glyphicon glyphicon-chevron-left back" id="search2main"></span>
+			<span class="glyphicon glyphicon-user" id="picture"></span></span>
+			<input class="form-control" type="text" id="topInput" placeholder="我的位置" >
+			<span class="input-group-btn"><button class="btn btn-default" data-toggle="modal" data-target="#myTime">查询</button></span>
+		</div>
+	<div class="panel panel-default" id="ddd"></div>
+	<div id="demo">
+		<div class="panel-group">
+			<!-- 功能面板 -->
+			<div class="panel panel-default">
+				<div class="panel-heading text-center" id="head">
+					输入你要搜索的位置或直接点击查询搜索您附近的停车场信息
+				</div>
+				<div class="panel-body text-center">
+					功能尚待开发
+				</div>
+			</div>
+			<!-- 历史搜索记录 -->
+			<div class="panel panel-default" id="historyPanel">
+				<div class="panel-heading text-center">
+					<div class="row">
+						<div class="col-xs-4"></div>
+						<div class="col-xs-4">
+							<span class="text-center">历史记录（记录从cookie中读取）</span>
+						</div>
+						<div class="col-xs-4">
+							<span class="glyphicon glyphicon-trash pull-right" id="clear" data-toggle="modal" data-target="#myModal">清空</span>
+						</div>
+					</div>
+				</div>	
+				<div class="panel-body" id="cookieHistory" ></div>
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+
+
+<!-- 输入停车时间 -->
+<div class="modal fade" id="myTime" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">请输入预约时间</h4>
+            </div>
+            <div class="modal-body">
+            	 <form class="form-horizontal" role="form">
+            	 	<input class="form-control" type="hidden"  id="lng" name="lng"  >
+					<input class="form-control" type="hidden" id="lat" name="lat">
+					<input class="form-control" type="hidden" id="searchlat" name="searchlat">
+					<input class="form-control" type="hidden" id="searchlng" name="searchlng">
+                	<div class="form-group">
+                		<label for="indate" class="col-xs-4 control-label">入场日期</label>
+                		<div class="col-xs-8">
+                			<input type="date"  class="form-control" name="indate" id="indate">
+                		</div>
+                	</div>
+                	<div class="form-group">
+                		<label for="intime" class="col-xs-4 control-label">入场时间</label>
+                		<div class="col-xs-8">
+                			<input type="time"  class="form-control" name="intime" id="intime">
+                		</div>
+                	</div>
+                	<div class="form-group">
+                		<label for="outdate" class="col-xs-4 control-label">离场日期</label>
+                		<div class="col-xs-8">
+                			<input type="date"  class="form-control" name="outdate" id="outdate">
+                		</div>
+                	</div>
+                	<div class="form-group">
+                		<label for="outtime" class="col-xs-4 control-label">离场时间</label>
+                		<div class="col-xs-8">
+                			<input type="time"  class="form-control" name="outtime" id="outtime">
+                		</div>
+                	</div>
+                	<div class="row">
+                	<div class="col-xs-2"></div>
+                		<div class="col-xs-8">
+                	 		<button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                			<button type="submit" class="btn btn-info pull-right" data-dismiss="modal" id="query">选位</button>
+                	 	</div>
+                	 	<div class="col-xs-2"></div>
+                	</div>
+                </form>
+            </div>
+            
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>
